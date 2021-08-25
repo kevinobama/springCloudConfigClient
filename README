@@ -1,0 +1,32 @@
+6. The Client Implementation
+Next, let's take care of the client. This will be a very simple client application, consisting of a REST controller with one GET method.
+
+The configuration, to fetch our server, must be placed in a resource file named bootstrap.application, because this file (like the name implies) will be loaded very early while the application starts:
+
+@SpringBootApplication
+@RestController
+public class ConfigClient {
+    
+    @Value("${user.role}")
+    private String role;
+
+    public static void main(String[] args) {
+        SpringApplication.run(ConfigClient.class, args);
+    }
+
+    @GetMapping(
+      value = "/whoami/{username}",  
+      produces = MediaType.TEXT_PLAIN_VALUE)
+    public String whoami(@PathVariable("username") String username) {
+        return String.format("Hello! 
+          You're %s and you'll become a(n) %s...\n", username, role);
+    }
+}
+In addition to the application name, we also put the active profile and the connection-details in our bootstrap.properties:
+
+spring.application.name=config-client
+spring.profiles.active=development
+spring.cloud.config.uri=http://localhost:8888
+spring.cloud.config.username=root
+spring.cloud.config.password=s3cr3t
+To test, if the configuration is properly received from our server and the role value gets injected in our controller method, we simply curl it after booting the client:
